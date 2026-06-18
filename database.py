@@ -14,7 +14,7 @@ DB_PASSWORD = os.environ.get("DB_PASSWORD", "").strip()
 DB_NAME     = os.environ.get("DB_NAME", "").strip()
 DB_TENANT   = os.environ.get("DB_TENANT", "").strip()
 
-pport_env    = os.environ.get("DB_PORT", "6543").strip()
+port_env    = os.environ.get("DB_PORT", "6543").strip()
 DB_PORT     = int(port_env) if port_env.isdigit() else 6543
 
 def _resolve_ipv4(host: str) -> str:
