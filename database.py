@@ -15,10 +15,15 @@ DB_NAME     = os.environ.get("DB_NAME", "").strip()
 DB_PORT     = int(os.environ.get("DB_PORT", 5432))
 
 def _resolve_ipv4(host: str) -> str:
-    """Resuelve el host estrictamente por IPv4, ignorando registros AAAA."""
-    results = socket.getaddrinfo(host, None, socket.AF_INET, socket.SOCK_STREAM)
+    """Resuelve el host estrictamente por IPv4, previniendo strings vacíos o nulos."""
+    if not host or not isinstance(host, str):
+        raise ValueError("El Host de la base de datos no está configurado correctamente en el entorno.")
+    
+    # Limpiamos posibles espacios o comillas accidentales
+    clean_host = host.strip().replace('"', '').replace("'", "")
+    
+    results = socket.getaddrinfo(clean_host, None, socket.AF_INET, socket.SOCK_STREAM)
     return results[0][4][0]
-
 
 def _make_connection():
     ipv4 = _resolve_ipv4(DB_HOST)
