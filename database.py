@@ -31,18 +31,25 @@ def _resolve_ipv4(host: str) -> str:
 
 def _make_connection():
     ipv4 = _resolve_ipv4(DB_HOST)
-    tenant_id = DB_HOST.split('.')[1] if '.' in DB_HOST else "gjcckbkihtjczkuutixa"
+    
+    # Si DB_HOST está listo, extraemos el id, de lo contrario usamos tu ID real
+    if DB_HOST and '.' in DB_HOST:
+        tenant_id = DB_HOST.split('.')[0] if "supabase" in DB_HOST else "gjcckbkihtjczkuutixa"
+    else:
+        tenant_id = "gjcckbkihtjczkuutixa"
+        
+    # La forma oficial de Supabase para indicar el tenant por IP es usar 'usuario.tenant'
+    user_with_tenant = f"{DB_USER}.{tenant_id}" if tenant_id not in DB_USER else DB_USER
+
     return psycopg2.connect(
         host=ipv4,
         port=DB_PORT,
-        user=DB_USER,
+        user=user_with_tenant,
         password=DB_PASSWORD,
         dbname=DB_NAME,
         connect_timeout=10,
-        sslmode="require",
-        options=f"-c project={tenant_id}"
+        sslmode="require"
     )
-
 
 engine = create_engine(
     "postgresql+psycopg2://",
