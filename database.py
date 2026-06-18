@@ -8,12 +8,11 @@ from sqlalchemy.orm import sessionmaker
 
 load_dotenv()
 
-DB_HOST     = os.environ["DB_HOST"]
-DB_USER     = os.environ["DB_USER"]
-DB_PASSWORD = os.environ["DB_PASSWORD"]
-DB_NAME     = os.environ["DB_NAME"]
+DB_HOST     = os.environ.get("DB_HOST", "").strip()
+DB_USER     = os.environ.get("DB_USER", "").strip()
+DB_PASSWORD = os.environ.get("DB_PASSWORD", "").strip()
+DB_NAME     = os.environ.get("DB_NAME", "").strip()
 DB_PORT     = int(os.environ.get("DB_PORT", 5432))
-
 
 def _resolve_ipv4(host: str) -> str:
     """Resuelve el host estrictamente por IPv4, ignorando registros AAAA."""
