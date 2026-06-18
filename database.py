@@ -1,4 +1,6 @@
 import os
+import socket
+import psycopg2
 from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
@@ -6,9 +8,40 @@ from sqlalchemy.orm import sessionmaker
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/canchas_db")
+DB_HOST     = os.environ["DB_HOST"]
+DB_USER     = os.environ["DB_USER"]
+DB_PASSWORD = os.environ["DB_PASSWORD"]
+DB_NAME     = os.environ["DB_NAME"]
+DB_PORT     = int(os.environ.get("DB_PORT", 5432))
 
-engine = create_engine(DATABASE_URL)
+
+def _resolve_ipv4(host: str) -> str:
+    """Resuelve el host estrictamente por IPv4, ignorando registros AAAA."""
+    results = socket.getaddrinfo(host, None, socket.AF_INET, socket.SOCK_STREAM)
+    return results[0][4][0]
+
+
+def _make_connection():
+    ipv4 = _resolve_ipv4(DB_HOST)
+    return psycopg2.connect(
+        host=ipv4,
+        port=DB_PORT,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        dbname=DB_NAME,
+        connect_timeout=10,
+        sslmode="require",
+    )
+
+
+engine = create_engine(
+    "postgresql+psycopg2://",
+    creator=_make_connection,
+    pool_pre_ping=True,
+    pool_size=5,
+    max_overflow=10,
+)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
